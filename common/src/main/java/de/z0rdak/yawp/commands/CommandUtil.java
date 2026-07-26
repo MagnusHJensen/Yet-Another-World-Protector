@@ -29,13 +29,11 @@ import de.z0rdak.yawp.util.text.messages.pagination.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.DimensionArgument;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.TeamArgument;
-import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.commands.arguments.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Team;
 import org.apache.commons.lang3.StringUtils;
@@ -83,8 +81,8 @@ public class CommandUtil {
                 .then(literal(PLAYER)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
-                                        .executes(ctx -> removePlayers(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
+                                .then(Commands.argument(PLAYER.toString(), GameProfileArgument.gameProfile())
+                                        .executes(ctx -> removePlayers(ctx, getGameProfilesArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
                                 .then(literal(BY_UUID)
                                         .then(Commands.argument(PLAYER_UUID.toString(), UuidArgument.uuid())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(regionSupplier.apply(ctx).getGroup(getGroupArgument(ctx)).getPlayers().keySet().stream().map(UUID::toString).collect(Collectors.toList()), builder))
@@ -118,8 +116,8 @@ public class CommandUtil {
                 .then(literal(PLAYER)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
-                                        .executes(ctx -> addPlayers(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
+                                .then(Commands.argument(PLAYER.toString(), GameProfileArgument.gameProfile())
+                                        .executes(ctx -> addPlayers(ctx, getGameProfilesArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
                                 .then(literal(BY_UUID)
                                         .then(Commands.argument(PLAYER_UUID.toString(), UuidArgument.uuid())
                                                 .executes(ctx -> addPlayerByUuid(ctx, getPlayerUUIDArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx)))))
@@ -384,8 +382,8 @@ public class CommandUtil {
     }
 
 
-    private static int removePlayers(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, IProtectedRegion region, String group) {
-        players.forEach(player -> CommandUtil.removePlayer(ctx, player, region, group));
+    private static int removePlayers(CommandContext<CommandSourceStack> ctx, Collection<NameAndId> players, IProtectedRegion region, String group) {
+        players.forEach(player -> CommandUtil.removePlayer(ctx, player.id(), player.name(), region, group));
         return 0;
     }
 
@@ -490,8 +488,8 @@ public class CommandUtil {
         }
     }
 
-    public static int addPlayers(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, IProtectedRegion region, String group) {
-        players.forEach(player -> CommandUtil.addPlayer(ctx, player, region, group));
+    public static int addPlayers(CommandContext<CommandSourceStack> ctx, Collection<NameAndId> players, IProtectedRegion region, String group) {
+        players.forEach(player -> CommandUtil.addPlayer(ctx, player.id(), player.name(), region, group));
         return 0;
     }
 

@@ -23,22 +23,17 @@ import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.IdentifierArgument;
-import net.minecraft.commands.arguments.TeamArgument;
-import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.commands.arguments.*;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 
@@ -146,6 +141,18 @@ public class ArgumentUtil {
 
     public static Collection<ServerPlayer> getPlayersArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayers(ctx, CommandConstants.PLAYER.toString());
+    }
+
+    public static Collection<NameAndId> getGameProfilesArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        try {
+            return GameProfileArgument.getGameProfiles(ctx, CommandConstants.PLAYER.toString());
+        } catch (Exception e) {
+            if (e instanceof CommandSyntaxException) {
+                throw e;
+            }
+            // Ignore other errors as it's most likely a Mojang auth error profile not found.
+            return Collections.emptyList();
+        }
     }
 
     public static java.util.UUID getPlayerUUIDArgument(CommandContext<CommandSourceStack> ctx) {
